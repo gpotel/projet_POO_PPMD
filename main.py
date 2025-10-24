@@ -22,7 +22,7 @@ class Grille():
         self.bloquee = self.grille != 0
     
     def en_cases(self):
-        return [[Case(self.grille[i,j], self.bloquee[i,j]) for i in range(self.taille)] for j in range(self.taille)]
+        return [[Case(self.grille[i,j], self.bloquee[i,j]) for j in range(self.taille)] for i in range(self.taille)]
     
     def en_liste(self):
         return self.grille.tolist()
@@ -74,11 +74,10 @@ class Grille():
     
     def __str__(self):
         cases = self.en_cases()
-        cases = [list(ligne) for ligne in zip(*cases)]
         lignes = []
         for i, ligne in enumerate(cases):
             if i % 3 == 0 and i != 0:
-                lignes.append("-" * 25)
+                lignes.append("-" * 22)
             Ligne = []
             for j, case in enumerate(ligne):
                 Ligne.append(str(case))
