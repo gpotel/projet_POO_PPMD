@@ -45,7 +45,7 @@ class Grille():
         if self.bloquee[ligne, colonne]:
             return False
         if valeur == 0:
-            return self.grille[ligne, colonne] = valeur
+            self.grille[ligne, colonne] = 0
             return True
         if self.est_correct(ligne, colonne, valeur):
             self.grille[ligne, colonne] = valeur
@@ -109,32 +109,50 @@ class GenerateurSudoku():
 
 
 class ResolveurSudoku():
-    def resoudre(grille):
-        pass
+    def __init__(self, grille):
+        self.grille = grille
+    
+    def resoudre(self):
+        vide = self.grille.case_vide()
+        if not vide:
+            return True
+        ligne, colonne = vide
+        
+        for chiffre in range(1, 10):
+            if self.grille.est_correct(ligne, colonne, chiffre):
+                self.grille.grille[ligne, colonne] = chiffre
+                if self.resoudre():
+                    return True
+                self.grille.grille[ligne, colonne] = 0
+        return False
         #
     
-    def trouver_cellule_vide():
-        pass
-        #
-
 
 
 class Jeu():
-    def jouer():
-        pass
-        #
+    def __init__(self, grille_initiale):
+        self.grille = Grille()
+        if grille_initiale is not None:
+            self.grille.en_matrice(grille_initiale)
+        self.resolveur = ResolveurSudoku(self.grille)
     
-    def victoire():
-        pass
-        #Vérifie si la partie est gagnée ou non
+    def resoudre(self):
+        print("Résolution en cours \n")
+        if self.resolveur.solve():
+            print("Sudoku résolu")
+            print(self.grille)
+        else:
+            print("Aucune solution trouvée ... :(")
     
-    def test():
-        pass
+    def montrer():
+        print(self.grille)
 
 
 
 #Ajouter des fonctions pour print ce qu'il faut
 #Ajouter des spécifications de type pour clarifier le code
+#Ajouter une méthode pour copier la grille à l'initialisation ?
+
 
 
 if __name__ == "__main__":
