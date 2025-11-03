@@ -92,29 +92,36 @@ class Case():
     def __init__(self, valeur, bloquee, annotations=[]):
         self.valeur = valeur
         self.bloquee = bloquee
-        self.annotations = annotations
-        
-    def set_valeur(self, valeur):
-        if not self.affichee:
-            self.valeur = valeur
-        #Complète la case avec le chiffre voulu par le joueur
-    
-    def vider(self):
-        if not self.bloquee:
-            self.valeur = 0
-        #Vide la case
+        self.annotations = set()
     
     def est_vide(self):
-        self.valeur = 0
+        return self.valeur == 0
         #Vérifie si la case est vide ou non
+    
+    def est_bloquee(self):
+        return self.bloquee
 
-    def set_annotation():
-        pass
+    def ajouter_annotation(self, chiffre):
+        if self.est_vide() and not self.est_bloquee() and 1 <= chiffre <= 9:
+            self.annotations.add(chiffre)
         #Annote la case avec le chiffre voulu par le joueur
+    
+    def retirer_annotations(self, chiffre):
+        self.annotations.discard(chiffre)
+        
+    def vider_annotations(self):
+        self.annotations.clear()
+    
+    def set_valeur(self, valeur):
+        if not self.est_bloquee():
+            self.valeur = valeur
+            self.vider_annotations()
     
     def __repr__(self):
         if self.valeur !=0:
             return str(int(self.valeur))
+        elif self.annotations:
+            return "(" + "".join(str(x) for x in sorted(self.annotations)) + ")"
         else:
             return "."
 
@@ -245,9 +252,29 @@ class Jeu():
         self.grille = Grille(9)
         if grille_initiale is not None:
             self.grille.dapres_matrice(grille_initiale)
+        
+        self.annotations = [[set() for i in range(9)] for j in range(9)]
             
     def montrer(self):
-        print(self.grille)
+        print()
+        for i in range(9):
+            if i % 3 == 0 and i != 0:
+                print("-" * 43)
+            ligne_aff = []
+            for j in range(9):
+                val = int(self.grille.grille[i,j])
+                if val != 0:
+                    affichage = " " + str(val) + " "
+                elif self.annotations[i][j]:
+                    notes = "".join(str(x) for x in sorted(self.annotations[i][j]))
+                    affichage = "{" + notes + "}"
+                else:
+                    affichage = " . "
+                ligne_aff.append(affichage)
+                if (j+1) % 3 == 0 and j != 8:
+                    ligne_aff.append(" | ")
+            print(" ".join(ligne_aff))
+        print()
     
     def jouer_coup(self, ligne, colonne, valeur):
         if self.grille.bloquee[ligne, colonne]:
@@ -260,6 +287,13 @@ class Jeu():
             print(f"\n{valeur} ne peut pas être placée en ({ligne+1},{colonne+1})")
             return False
         self.grille.grille[ligne, colonne] = valeur
+        carre_ligne = ligne // 3
+        carre_colonne = colonne // 3
+        for i in range(3):
+            for j in range(3):
+                ind_i = carre_ligne * 3 + 1
+                ind_j = carre_colonne * 3 + 1
+                self.annotations[ind_i][ind_j].remove(valeur)
         print(f"\n{valeur} placé en ({ligne+1}, {colonne+1})")
         return True
     
@@ -268,12 +302,31 @@ class Jeu():
     
     def est_complete(self):
         return self.grille.est_complete()
+    
+    def annoter_case(self, ligne, colonne, chiffre):
+        if self.grille.bloquee[ligne, colonne]:
+            print("\nImpossible d'annoter une case fixée")
+            return False
+        if not (1 <= chiffre <= 9):
+            print("\nLes annotations doivent être comprises entre 1 et 9")
+            return False
+        
+        notes = self.annotations[ligne][colonne]
+        if chiffre in notes:
+            notes.remove(chiffre)
+            print(f"\nAnnotation {chiffre} retirée de ({ligne+1}, {colonne+1})")
+        else:
+            notes.add(chiffre)
+            print(f"\nAnnotation {chiffre} ajoutée en ({ligne+1}, {colonne+1})")
+        return True
+        
 
 #Ajouter des fonctions pour print ce qu'il faut
 #Ajouter des spécifications de type pour clarifier le code
 #Ajouter une méthode pour copier la grille à l'initialisation ?
-
-
+# __str__ de grille tombe en désuétude par la modification de jeu.montrer()
+#La classe Case() ne sert à rien en fait
+#Nettoyer les annotations partout où elles ne servent plus
 
 if __name__ == "__main__":
     generateur = GenerateurSudoku()
@@ -284,24 +337,35 @@ if __name__ == "__main__":
     jeu.montrer()
     
     while not jeu.est_complete():
-        entree = input("Ligne Colonne Valeur (ex : 3 4 5) :").strip().lower()
+        entree = input('Ligne Colonne Valeur ("a Ligne Colonne Valeur" pour annoter, q pour quitter):').strip().lower()
         if entree in ("q", "quit", "exit"):
             print("\nVous avez quitté le jeu :(")
             break
         
         try:
-            ligne, colonne, valeur = map(int, entree.split())
-            ligne -= 1
-            colonne -= 1
+            parties = entree.split()
+            if parties[0] == "a" and len(parties) == 4:
+                x, l, c, v = parties
+                ligne, colonne, valeur = int(l)-1, int(c)-1, int(v)
+                jeu.annoter_case(ligne, colonne, valeur)
+            else:
+                ligne, colonne, valeur = map(int, parties)
+                ligne -= 1
+                colonne -= 1
+                if not (0 <= ligne <= 8 and 0 <= colonne <= 8 and 0 <= valeur <= 9):
+                    print("Vous avez dépassé les bornes ! 1-9 pour les cases, 1-9 pour les valeurs et 0 pour effacer")
+                    continue
+                jeu.jouer_coup(ligne, colonne, valeur)
+                
         except ValueError:
             print("Format invalide : concentre toi")
             continue
         
-        if not (0 <= ligne <= 8 and 0 <= colonne <= 8 and 0 <= valeur <= 9):
-            print("Vous avez dépassé les bornes ! 1-9 pour les cases, 1-9 pour les valeurs et 0 pour effacer")
-            continue
+        # if not (0 <= ligne <= 8 and 0 <= colonne <= 8 and 0 <= valeur <= 9):
+        #     print("Vous avez dépassé les bornes ! 1-9 pour les cases, 1-9 pour les valeurs et 0 pour effacer")
+        #     continue
         
-        success = jeu.jouer_coup(ligne, colonne, valeur)
+        # success = jeu.jouer_coup(ligne, colonne, valeur)
         print("\n")
         
         jeu.montrer()
