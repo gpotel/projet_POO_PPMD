@@ -150,15 +150,54 @@ class GenerateurSudoku():
         
         grille.bloquee[:, :] = True
     
-    def _retirer_cases(self, grille):
+    def _retirer_cases(self, grille, nb_tentative = 1000):
         cases_a_retirer = self.difficulte
-        while cases_a_retirer > 0:
+        tentative = 0
+        while cases_a_retirer > 0 and tentative < nb_tentative:
             ligne = rd.randint(0,8)
             colonne = rd.randint(0,8)
-            if grille.grille[ligne, colonne] != 0:
-                grille.grille[ligne, colonne] = 0
-                grille.bloquee[ligne, colonne] = False
+            if grille.grille[ligne, colonne] == 0:
+                continue
+            valeur_sauv = grille.grille[ligne, colonne]
+            grille.grille[ligne, colonne] = 0
+            grille.bloquee[ligne, colonne] = False
+            
+            copie = Grille(9)
+            copie.dapres_matrice(cp.deepcopy(grille.grille))
+            resolveur = ResolveurSudoku(copie)
+            nb_solutions = self._compter_solutions(resolveur, limite=2)
+            
+            if nb_solutions != 1:
+                grille.grille[ligne, colonne] = valeur_sauv
+                grille.bloquee[ligne, colonne] = True
+            else:
                 cases_a_retirer -= 1
+            tentative += 1
+            # if grille.grille[ligne, colonne] != 0:
+            #     grille.grille[ligne, colonne] = 0
+            #     grille.bloquee[ligne, colonne] = False
+            #     cases_a_retirer -= 1
+    
+    def _compter_solutions(self, resolveur, limite=2):
+        solutions = [0]
+        
+        def backtrack():
+            if solutions[0] >= limite:
+                return
+            vide = resolveur.grille.case_vide()
+            if not vide:
+                solutions[0]+=1
+                return
+            ligne, colonne = vide
+            for chiffre in range(1, 10):
+                if resolveur.grille.est_correct(ligne, colonne, chiffre):
+                    resolveur.grille.grille[ligne, colonne] = chiffre
+                    backtrack()
+                    resolveur.grille.grille[ligne, colonne] = 0
+        
+        backtrack()
+        return solutions[0]
+    
 
 
 
