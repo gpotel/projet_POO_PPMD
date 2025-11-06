@@ -21,8 +21,8 @@ class Grille():
         self.grille = np.array(matrice)
         self.bloquee = self.grille != 0
     
-    def en_cases(self):
-        return [[Case(self.grille[i,j], self.bloquee[i,j]) for j in range(self.taille)] for i in range(self.taille)]
+    # def en_cases(self):
+    #     return [[Case(self.grille[i,j], self.bloquee[i,j]) for j in range(self.taille)] for i in range(self.taille)]
     
     def en_liste(self):
         return self.grille.tolist()
@@ -72,58 +72,58 @@ class Grille():
         else:
             return None
     
-    def __str__(self):
-        cases = self.en_cases()
-        lignes = []
-        for i, ligne in enumerate(cases):
-            if i % 3 == 0 and i != 0:
-                lignes.append("-" * 22)
-            Ligne = []
-            for j, case in enumerate(ligne):
-                Ligne.append(str(case))
-                if (j + 1) % 3 == 0 and j != 8:
-                    Ligne.append("|")
-            lignes.append(" ".join(Ligne))
-        return "\n".join(lignes)
+    # def __str__(self):
+    #     # cases = self.en_cases()
+    #     lignes = []
+    #     for i, ligne in enumerate(cases):
+    #         if i % 3 == 0 and i != 0:
+    #             lignes.append("-" * 22)
+    #         Ligne = []
+    #         for j, case in enumerate(ligne):
+    #             Ligne.append(str(case))
+    #             if (j + 1) % 3 == 0 and j != 8:
+    #                 Ligne.append("|")
+    #         lignes.append(" ".join(Ligne))
+    #     return "\n".join(lignes)
     
 
 
-class Case():
-    def __init__(self, valeur, bloquee, annotations=[]):
-        self.valeur = valeur
-        self.bloquee = bloquee
-        self.annotations = set()
+# class Case():
+#     def __init__(self, valeur, bloquee, annotations=[]):
+#         self.valeur = valeur
+#         self.bloquee = bloquee
+#         self.annotations = set()
     
-    def est_vide(self):
-        return self.valeur == 0
-        #Vérifie si la case est vide ou non
+#     def est_vide(self):
+#         return self.valeur == 0
+#         #Vérifie si la case est vide ou non
     
-    def est_bloquee(self):
-        return self.bloquee
+#     def est_bloquee(self):
+#         return self.bloquee
 
-    def ajouter_annotation(self, chiffre):
-        if self.est_vide() and not self.est_bloquee() and 1 <= chiffre <= 9:
-            self.annotations.add(chiffre)
-        #Annote la case avec le chiffre voulu par le joueur
+#     def ajouter_annotation(self, chiffre):
+#         if self.est_vide() and not self.est_bloquee() and 1 <= chiffre <= 9:
+#             self.annotations.add(chiffre)
+#         #Annote la case avec le chiffre voulu par le joueur
     
-    def retirer_annotations(self, chiffre):
-        self.annotations.discard(chiffre)
+#     def retirer_annotations(self, chiffre):
+#         self.annotations.discard(chiffre)
         
-    def vider_annotations(self):
-        self.annotations.clear()
+#     def vider_annotations(self):
+#         self.annotations.clear()
     
-    def set_valeur(self, valeur):
-        if not self.est_bloquee():
-            self.valeur = valeur
-            self.vider_annotations()
+#     def set_valeur(self, valeur):
+#         if not self.est_bloquee():
+#             self.valeur = valeur
+#             self.vider_annotations()
     
-    def __repr__(self):
-        if self.valeur !=0:
-            return str(int(self.valeur))
-        elif self.annotations:
-            return "(" + "".join(str(x) for x in sorted(self.annotations)) + ")"
-        else:
-            return "."
+#     def __repr__(self):
+#         if self.valeur !=0:
+#             return str(int(self.valeur))
+#         elif self.annotations:
+#             return "(" + "".join(str(x) for x in sorted(self.annotations)) + ")"
+#         else:
+#             return "."
 
 class GenerateurSudoku():
     def __init__(self, difficulte=40):
@@ -330,6 +330,7 @@ class Jeu():
 # __str__ de grille tombe en désuétude par la modification de jeu.montrer()
 #La classe Case() ne sert à rien en fait
 #Nettoyer les annotations partout où elles ne servent plus
+
 
 if __name__ == "__main__":
     generateur = GenerateurSudoku()
