@@ -291,9 +291,11 @@ class Jeu():
         carre_colonne = colonne // 3
         for i in range(3):
             for j in range(3):
-                ind_i = carre_ligne * 3 + 1
-                ind_j = carre_colonne * 3 + 1
-                self.annotations[ind_i][ind_j].remove(valeur)
+                ind_i = carre_ligne * 3 + i
+                ind_j = carre_colonne * 3 + j
+                print(ind_i, ind_j, self.annotations[ind_i][ind_j])
+                if valeur in self.annotations[ind_i][ind_j]:
+                    self.annotations[ind_i][ind_j].remove(valeur)
         print(f"\n{valeur} placé en ({ligne+1}, {colonne+1})")
         return True
     
@@ -310,7 +312,8 @@ class Jeu():
         if not (1 <= chiffre <= 9):
             print("\nLes annotations doivent être comprises entre 1 et 9")
             return False
-        
+        # if not (0<= ligne <= 8) and (0<= colonne <= 8):
+        #     print("")
         notes = self.annotations[ligne][colonne]
         if chiffre in notes:
             notes.remove(chiffre)
@@ -347,6 +350,9 @@ if __name__ == "__main__":
             if parties[0] == "a" and len(parties) == 4:
                 x, l, c, v = parties
                 ligne, colonne, valeur = int(l)-1, int(c)-1, int(v)
+                if not (0 <= ligne <= 8 and 0 <= colonne <= 8 and 0 <= valeur <= 9):
+                    print("Vous avez dépassé les bornes ! 1-9 pour les cases, 1-9 pour les valeurs et 0 pour effacer")
+                    continue
                 jeu.annoter_case(ligne, colonne, valeur)
             else:
                 ligne, colonne, valeur = map(int, parties)
@@ -374,3 +380,5 @@ if __name__ == "__main__":
         print("Trop fort ! Quel boss !!!")
     if entree not in ("q", "quit", "exit"):
         input("Appuyer sur entrée pour quitter")
+        
+        
